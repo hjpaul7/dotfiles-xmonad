@@ -1,0 +1,18 @@
+[colors]
+
+dark0_hard = {color0}
+dark0_soft = {color8}
+light0_hard = {color15}
+light0_soft = {color7}
+faded_red = {color1}
+faded_green = {color2}
+faded_yellow = {color3}
+faded_blue = {color4}
+faded_purple = {color5}
+faded_aqua = {color6}
+bright_red = {color9}
+bright_green = {color10}
+bright_yellow = {color11}
+bright_blue = {color12}
+bright_purple = {color13}
+bright_aqua = {color14}
