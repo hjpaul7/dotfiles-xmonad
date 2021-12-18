@@ -17,5 +17,6 @@ bright_blue=%{F#7db9c7}
 bright_purple=%{F#fe448b}
 bright_aqua=%{F#71e7ff}
 rosepine_pink=%{F#eb6f93}
+arch_blue=%{F#1793d1}
 
 RESET=%{F-}
