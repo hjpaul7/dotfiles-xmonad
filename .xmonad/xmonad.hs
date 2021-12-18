@@ -16,8 +16,9 @@ import XMonad.Actions.CopyWindow (kill1)
 import Data.Semigroup
 import Data.Monoid
 import Data.Maybe (fromJust)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, maybeToList)
 import qualified Data.Map        as M
+import Control.Monad (when, join)
 
 -- Hooks
 import XMonad.Hooks.DynamicProperty
@@ -25,7 +26,7 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks (avoidStruts, docksEventHook, manageDocks, ToggleStruts(..))
 import XMonad.Hooks.SetWMName
-import XMonad.Hooks.ManageHelpers (isFullscreen, doFullFloat, isDialog, doCenterFloat, doRectFloat)
+import XMonad.Hooks.ManageHelpers (isFullscreen, doFullFloat, isDialog, doCenterFloat, doRectFloat, doSideFloat, Side(NE))
 
 -- Layouts
 import XMonad.Layout.Accordion
@@ -37,6 +38,8 @@ import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
 import Data.List
 import XMonad.Layout.IndependentScreens
+import XMonad.Layout.Fullscreen
+    ( fullscreenEventHook, fullscreenManageHook, fullscreenSupport, fullscreenFull )
 
 --Layouts modifers
 import XMonad.Layout.LayoutModifier
@@ -117,7 +120,8 @@ myTabTheme = def { fontName          = myFont
 -- Space between Tiling Windows
 ------------------------------------------------------------------------
 mySpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
-mySpacing i = spacingRaw False (Border 40 10 10 10) True (Border 10 10 10 10) True
+-- mySpacing i = spacingRaw False (Border 40 10 10 10) True (Border 10 10 10 10) True
+mySpacing i = spacingRaw False (Border i i i i) True (Border 10 10 10 10) True
 
 
 ------------------------------------------------------------------------
@@ -212,7 +216,9 @@ myScratchPads =
 -- Key bindings. Add, modify or remove key bindings here.
 
 rofi_launcher = spawn "rofi -no-lazy-grab -show drun -modi drun -theme kde-runner"
-
+firefox_launcher = spawn "firefox"
+rofi_powermenu = spawn "rofi -show power-menu -modi power-menu:rofi-power-menu -theme kde-runner"
+nemo_launcher = spawn "nemo"
 
 
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
@@ -225,6 +231,19 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch rofi
     , ((modm,               xK_s     ), rofi_launcher)
+
+    -- fullscreen
+    , ((modm,               xK_f     ), sendMessage (MT.Toggle NBFULL) >> sendMessage ToggleStruts)
+--     , ((modm,               xK_f     ), sendMessage ToggleStruts)
+
+    -- launch rofi power menu
+    , ((modm,               xK_p     ), rofi_powermenu)
+
+    -- launch Firefox
+    , ((modm,               xK_c     ), firefox_launcher)
+
+    -- launch Nemo
+    , ((modm,               xK_o     ), nemo_launcher)
 
     -- close focused window
     , ((modm,               xK_q     ), kill)
@@ -273,7 +292,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm              , xK_period), sendMessage (IncMasterN (-1)))
 
     -- Quit xmonad
-    , ((modm .|. shiftMask, xK_q     ), spawn "~/bin/powermenu.sh")
+    , ((modm .|. shiftMask, xK_q     ), io exitSuccess)
     ]
     ++
 
@@ -323,10 +342,15 @@ myManageHook = composeAll
      , className =? "Xfce4-appfinder"                   --> doFloat
      , className =? "Org.gnome.NautilusPreviewer"       --> doRectFloat (W.RationalRect 0.15 0.15 0.7 0.7)
      , className =? "Thunar"                            --> doRectFloat (W.RationalRect 0.15 0.15 0.7 0.7)
-     , className =? "Sublime_merge"                     --> doRectFloat (W.RationalRect 0.15 0.15 0.7 0.7)
      , isFullscreen -->  doFullFloat
      , isDialog --> doCenterFloat
      , className =? "zoom"                              --> zoomDimensions
+--     , className =? "Steam"                             --> doFloat
+--     , className =? "steam"                             --> doFullFloat
+     , className =? "nm-connection-editor"              --> doRectFloat (W.RationalRect 0.15 0.15 0.3 0.3)
+     , className =? "Nm-connection-editor"              --> doRectFloat (W.RationalRect 0.85 0.02 0.1 0.1)
+     , className =? "Connman-gtk"                       --> doRectFloat (W.RationalRect 0.85 0.02 0.1 0.1)
+     , className =? "Gnome-calculator"                  --> doCenterFloat
      ] <+> namedScratchpadManageHook myScratchPads
      
 
@@ -343,20 +367,22 @@ myStartupHook = do
     spawnOnce "picom --experimental-backend &"
 --  spawnOnce "mpd &"
     spawnOnce "echo 0 | sudo tee -a /sys/module/hid_apple/parameters/fnmode &"
---  spawnOnce "sleep 5 && conky -c $HOME/.config/conky/conky.conkyrc &"
-    spawnOnce "xrandr --output DP-2 --primary --mode 3840x2160 --right-of HDMI-0 --output HDMI-0 --mode 3840x2160"
---  setWMName "LG3D"
+    spawnOnce "xrandr --output DP-4 --primary --mode 3840x2160 --right-of HDMI-0 --output HDMI-0 --mode 3840x2160"
     spawnOnce "feh --bg-scale ~/Pictures/arch-4k.png"
-    spawnOnce "trayer --edge top --align right --SetDockType true --transparent true --padding 5 --monitor primary --SetPartialStrut true --expand true --widthtype request --iconspacing 10 --alpha 0 --tint 0x212733 --height 20 --distance 5 --margin 10"
+--    spawnOnce "trayer --edge top --align right --SetDockType true --transparent true --padding 5 --monitor primary --SetPartialStrut true --expand true --widthtype request --iconspacing 10 --alpha 0 --tint 0x212733 --height 20 --distance 5 --margin 10"
     spawnOnce "~/.local/bin/scripts/launch_polybar"
-
+--    spawnOnce "nm-applet"
+    spawnOnce "pa-applet"
+    spawnOnce "birdtray"
+    spawnOnce "--no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+    spawnOnce "gkraken"
+    spawnOnce "mopidy"
 ------------------------------------------------------------------------
 -- Main Do
 ------------------------------------------------------------------------
 main :: IO ()
 main = do
---        xmproc <- spawnPipe "~/.local/bin/xmobar ~/.xmobarrc"
-        xmonad $ ewmh def
+        xmonad $ ewmhFullscreen $ ewmh def
                 { manageHook = myManageHook <+> manageDocks
                 , modMask            = myModMask
                 , keys               = myKeys
