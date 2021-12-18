@@ -1,6 +1,6 @@
 <a href="https://i.imgur.com/Hr7EDSX.jpg" target="_blank">![XMonad, dotfiles](./xmonad-setup.jpg)</a>
 
-# Dotfiles - XMonad (Arch)
+# dotfiles - XMonad (Arch)
 
 ### OS - Arch
 
