@@ -121,7 +121,7 @@ myTabTheme = def { fontName          = myFont
 ------------------------------------------------------------------------
 mySpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
 -- mySpacing i = spacingRaw False (Border 40 10 10 10) True (Border 10 10 10 10) True
-mySpacing i = spacingRaw False (Border i i i i) True (Border 10 10 10 10) True
+mySpacing i = spacingRaw False (Border 20 i i i) True (Border 10 10 10 10) True
 
 
 ------------------------------------------------------------------------
@@ -255,7 +255,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
 
     -- Resize viewed windows to the correct size
-    , ((modm,               xK_n     ), refresh)
+--    , ((modm,               xK_n     ), refresh)
+
+    -- Rofi Network Manager
+    , ((modm,               xK_n     ), spawn "networkmanager_dmenu")
 
 
     -- Move focus to the next window
@@ -347,9 +350,10 @@ myManageHook = composeAll
      , className =? "zoom"                              --> zoomDimensions
 --     , className =? "Steam"                             --> doFloat
 --     , className =? "steam"                             --> doFullFloat
-     , className =? "nm-connection-editor"              --> doRectFloat (W.RationalRect 0.15 0.15 0.3 0.3)
-     , className =? "Nm-connection-editor"              --> doRectFloat (W.RationalRect 0.85 0.02 0.1 0.1)
-     , className =? "Connman-gtk"                       --> doRectFloat (W.RationalRect 0.85 0.02 0.1 0.1)
+--     , className =? "nm-connection-editor"              --> doRectFloat (W.RationalRect 0.15 0.15 0.3 0.3)
+--     , className =? "Nm-connection-editor"              --> doRectFloat (W.RationalRect 0.85 0.02 0.1 0.1)
+       , className =? "Nm-connection-editor"              --> doCenterFloat
+--     , className =? "Connman-gtk"                       --> doRectFloat (W.RationalRect 0.85 0.02 0.1 0.1)
      , className =? "Gnome-calculator"                  --> doCenterFloat
      ] <+> namedScratchpadManageHook myScratchPads
      
@@ -363,20 +367,17 @@ myHandleEventHook = dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floa
 -- Startup Hooks
 ------------------------------------------------------------------------
 myStartupHook = do
-    spawnOnce "$HOME/.xmonad/scripts/autostart.sh" 
+--    spawnOnce "$HOME/.xmonad/scripts/autostart.sh" 
     spawnOnce "picom --experimental-backend &"
---  spawnOnce "mpd &"
-    spawnOnce "echo 0 | sudo tee -a /sys/module/hid_apple/parameters/fnmode &"
     spawnOnce "xrandr --output DP-4 --primary --mode 3840x2160 --right-of HDMI-0 --output HDMI-0 --mode 3840x2160"
     spawnOnce "feh --bg-scale ~/Pictures/arch-4k.png"
 --    spawnOnce "trayer --edge top --align right --SetDockType true --transparent true --padding 5 --monitor primary --SetPartialStrut true --expand true --widthtype request --iconspacing 10 --alpha 0 --tint 0x212733 --height 20 --distance 5 --margin 10"
     spawnOnce "~/.local/bin/scripts/launch_polybar"
---    spawnOnce "nm-applet"
-    spawnOnce "pa-applet"
     spawnOnce "birdtray"
     spawnOnce "--no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
     spawnOnce "gkraken"
     spawnOnce "mopidy"
+    spawnOnce "gwe"
 ------------------------------------------------------------------------
 -- Main Do
 ------------------------------------------------------------------------
